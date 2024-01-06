@@ -1,11 +1,9 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-
 
 class SecondScreen extends StatefulWidget {
   final Uint8List image;
@@ -18,6 +16,7 @@ class SecondScreen extends StatefulWidget {
 class _SecondScreenState extends State<SecondScreen> {
   @override
   Widget build(BuildContext context) {
+    print("Image data: ${widget.image.length}");
     return Scaffold(
       backgroundColor: Colors.purple.shade100,
       body: Padding(
@@ -44,12 +43,13 @@ class _SecondScreenState extends State<SecondScreen> {
           const SizedBox(
             height: 50,
           ),
-           Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               ElevatedButton.icon(
                 onPressed: () {},
-                icon: const Icon( // <-- Icon
+                icon: const Icon(
+                  // <-- Icon
                   Icons.home,
                   size: 24.0,
                 ),
@@ -81,18 +81,32 @@ class _SecondScreenState extends State<SecondScreen> {
   }
 
   void shareImage() async {
-    String imagePath = await getImagePath();
+    if (widget.image.isNotEmpty) {
+      String imagePath = await getImagePath();
 
-    if (imagePath.isNotEmpty) {
-      Share.shareFiles([imagePath], text: 'Check out my AI-generated image!');
+      if (imagePath.isNotEmpty) {
+        Share.shareFiles([imagePath], text: 'Check out my AI-generated image!');
+      } else {
+        // Handle error or show a message if imagePath is empty
+        print("Unable to share image. Image path is empty.");
+      }
     } else {
-      // Handle error or show a message if imagePath is empty
+      // Handle the case where image data is empty
+      print("Unable to share image. Image data is empty.");
     }
-    }
+  }
 
   Future<String> getImagePath() async {
     final Directory appDocDir = await getApplicationDocumentsDirectory();
-    return "${appDocDir.path}/generated_image.png";
-    }
-}
+    String imagePath = "${appDocDir.path}/generated_image.png";
 
+    // Check if the file exists before returning the path
+    if (await File(imagePath).exists()) {
+      return imagePath;
+    } else {
+      // Handle the case where the file doesn't exist
+      print("File not found: $imagePath");
+      return "";
+    }
+  }
+}
